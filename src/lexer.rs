@@ -79,9 +79,12 @@ fn parse_block<I: Iterator<Item = (usize, char)>>(
             Some((_, '-')) => Instruction::Decrement,
             Some((_, '.')) => Instruction::Output,
             Some((_, ',')) => Instruction::Input,
-            Some((_, '[')) => Instruction::Loop(parse_block(iter, open_brackets)?),
+            Some((i, '[')) => {
+                open_brackets.push(i);
+                Instruction::Loop(parse_block(iter, open_brackets)?)
+            }
             Some((i, ']')) => {
-                if open_brackets.is_empty() {
+                if let None = open_brackets.pop() {
                     return Err(LexerError::MissingOpeningBracket(i));
                 }
 
