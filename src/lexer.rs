@@ -38,19 +38,19 @@ impl Display for Instruction {
 #[derive(Debug)]
 pub enum LexerError {
     MissingOpeningBracket(usize),
-    MissingEndingBracket,
+    MissingEndingBracket(usize),
 }
 
 impl Display for LexerError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::MissingEndingBracket => {
-                write!(f, "Your code is missing a closing bracket \"]\".")
-            }
+            Self::MissingEndingBracket(i) => write!(
+                f,
+                "Your code is missing a matching closing bracket for the bracket at index {i}."
+            ),
             Self::MissingOpeningBracket(i) => write!(
                 f,
-                "Your code is missing an opening bracket for the bracket at index {}",
-                i
+                "Your code is missing a matching opening bracket for the bracket at index {i}"
             ),
         }
     }
@@ -67,7 +67,7 @@ fn remove_comments<'a>(input: &'a str) -> impl Iterator<Item = (usize, char)> + 
 
 fn parse_block<I: Iterator<Item = (usize, char)>>(
     iter: &mut I,
-    open_brackets: i32,
+    open_brackets: &mut Vec<usize>,
 ) -> Result<Vec<Instruction>, LexerError> {
     let mut instructions = vec![];
 
@@ -79,9 +79,12 @@ fn parse_block<I: Iterator<Item = (usize, char)>>(
             Some((_, '-')) => Instruction::Decrement,
             Some((_, '.')) => Instruction::Output,
             Some((_, ',')) => Instruction::Input,
-            Some((_, '[')) => Instruction::Loop(parse_block(iter, open_brackets + 1)?),
+            Some((i, '[')) => {
+                open_brackets.push(i);
+                Instruction::Loop(parse_block(iter, open_brackets)?)
+            }
             Some((i, ']')) => {
-                if open_brackets == 0 {
+                if let None = open_brackets.pop() {
                     return Err(LexerError::MissingOpeningBracket(i));
                 }
 
@@ -92,15 +95,15 @@ fn parse_block<I: Iterator<Item = (usize, char)>>(
         });
     }
 
-    if open_brackets != 0 {
-        return Err(LexerError::MissingEndingBracket);
+    if let Some(index) = open_brackets.pop() {
+        return Err(LexerError::MissingEndingBracket(index));
     }
 
     Ok(instructions)
 }
 
 pub fn parse<S: AsRef<str>>(code: S) -> Result<Vec<Instruction>, LexerError> {
-    parse_block(&mut remove_comments(code.as_ref()), 0)
+    parse_block(&mut remove_comments(code.as_ref()), &mut vec![])
 }
 
 #[cfg(test)]
@@ -139,7 +142,7 @@ mod tests {
 
     #[test]
     fn parsing_hello_world() {
-        let p = parse(include_str!("tests/helloWorld.bf"));
+        let p = parse(include_str!("../programs/helloWorld.bf"));
 
         assert!(p.is_ok());
     }
