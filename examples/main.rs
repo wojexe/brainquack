@@ -1,8 +1,8 @@
 use brainquack::*;
 
 fn main() -> Result<(), BrainQuackError> {
-    let hello_world = lexer::parse(include_str!("programs/helloWorld.bf"))?;
-    let cell_size = lexer::parse(include_str!("programs/cellSize.bf"))?;
+    let hello_world = lexer::parse(include_str!("../programs/helloWorld.bf"))?;
+    let cell_size = lexer::parse(include_str!("../programs/cellSize.bf"))?;
 
     let mut memory = vec![std::num::Wrapping(0); 30_000];
 

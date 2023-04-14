@@ -139,7 +139,7 @@ mod tests {
 
     #[test]
     fn parsing_hello_world() {
-        let p = parse(include_str!("programs/helloWorld.bf"));
+        let p = parse(include_str!("../programs/helloWorld.bf"));
 
         assert!(p.is_ok());
     }

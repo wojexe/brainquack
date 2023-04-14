@@ -105,7 +105,7 @@ mod tests {
 
     #[test]
     fn hello_world() {
-        let instructions = parse(include_str!("programs/helloWorld.bf")).unwrap();
+        let instructions = parse(include_str!("../programs/helloWorld.bf")).unwrap();
         let mut memory: Vec<Wrapping<u8>> = vec![Wrapping(0); 30_000];
         let mut output = String::new();
 
@@ -115,7 +115,7 @@ mod tests {
 
     #[test]
     fn cell_size() {
-        let instructions = parse(include_str!("programs/cellSize.bf")).unwrap();
+        let instructions = parse(include_str!("../programs/cellSize.bf")).unwrap();
         let mut memory: Vec<Wrapping<u8>> = vec![Wrapping(0); 30_000];
         let mut output = String::new();
 
